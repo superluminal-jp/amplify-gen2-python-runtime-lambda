@@ -55,6 +55,17 @@ npm run dev
 -   User input handling
 -   Error handling and logging
 
+## Step-by-Step Tutorial
+A detailed step-by-step tutorial on how to build this project from scratch is available at:
+(AWS Amplify Gen 2 Python-runtime Lambda Function Tutorial)[https://screeching-era-6eb.notion.site/AWS-Amplify-Gen-2-Python-runtime-lambda-function-166d8c4cd2228086a9bcea067ae29142?pvs=74]
+
+The tutorial covers:
+-   Setting up a Next.js project with AWS Amplify Gen 2
+-   Implementing Python-runtime Lambda functions
+-   Creating and configuring GraphQL APIs
+-   Building the frontend user interface
+-   Testing and deployment procedures
+
 ## Contributing
 
 Feel free to submit issues and enhancement requests!

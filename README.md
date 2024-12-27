@@ -57,7 +57,7 @@ npm run dev
 
 ## Step-by-Step Tutorial
 A detailed step-by-step tutorial on how to build this project from scratch is available at:
-(AWS Amplify Gen 2 Python-runtime Lambda Function Tutorial)[https://screeching-era-6eb.notion.site/AWS-Amplify-Gen-2-Python-runtime-lambda-function-166d8c4cd2228086a9bcea067ae29142?pvs=74]
+[AWS Amplify Gen 2 Python-runtime Lambda Function Tutorial](https://screeching-era-6eb.notion.site/AWS-Amplify-Gen-2-Python-runtime-lambda-function-166d8c4cd2228086a9bcea067ae29142?pvs=74)
 
 The tutorial covers:
 -   Setting up a Next.js project with AWS Amplify Gen 2

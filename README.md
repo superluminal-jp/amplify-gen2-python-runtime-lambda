@@ -1,4 +1,4 @@
-# Amplify + Next.js Account Settings Application
+# AWS Amplify Amplify Gen 2: Account Settings Application
 
 This project is a Next.js App Router application integrated with AWS Amplify Gen 2 that provides a complete solution for user account management. AWS Amplify Gen 2 leverages AWS Cognito for user authentication and offers a responsive and user-friendly interface for managing account settings. This application showcases how to implement common account management features such as updating user attributes, confirming attribute changes via verification codes, password updates, and account deletion. See [AWS Amplify Gen 2](https://docs.amplify.aws/nextjs/build-a-backend/auth/) for more information.
 

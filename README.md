@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Amplify + Next.js Account Settings Application
 
-## Getting Started
+This project is a Next.js App Router application integrated with AWS Amplify Gen 2 that provides a complete solution for user account management. AWS Amplify Gen 2 leverages AWS Cognito for user authentication and offers a responsive and user-friendly interface for managing account settings. This application showcases how to implement common account management features such as updating user attributes, confirming attribute changes via verification codes, password updates, and account deletion. See [AWS Amplify Gen 2](https://docs.amplify.aws/nextjs/build-a-backend/auth/) for more information.
 
-First, run the development server:
+# <Authenticator> Component
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Sign-in, Sign-out, and Create Account features are provided by `<Authenticator>` component which is implemented in `src/app/layout.tsx` in this project. See [AWS Amplify Gen 2 Authenticator](https://docs.amplify.aws/nextjs/build-a-backend/auth/connect-your-frontend/using-the-authenticator/) for more information.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Account Setting Page
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The account setting page is implemented in `src/app/account-settings/page.tsx`. In this page, 4 features are implemented:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. View and Manage User Attributes
+2. Update User Information (email, username)
+3. Confirmation Code Handling
+4. Password Management
+5. Account Deletion
 
-## Learn More
+# Key Features
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. User Authentication
+    - Users can sign up, sign in, and manage sessions securely using AWS Cognito.
+    - Amplify’s Authenticator component handles all authentication flows (sign-up, sign-in, and multi-factor authentication if enabled).
+2. View and Manage User Attributes
+    - Users can view their attributes (e.g., name, email) fetched directly from AWS Cognito.
+    - Attributes are displayed in a table for clarity and accessibility.
+3. Update User Information
+    - Email Update: Users can update their email address and confirm the change via a verification code sent to their new email.
+    - Name Update: Users can update their display name without confirmation.
+4. Confirmation Code Handling
+    - If an attribute update requires confirmation (e.g., email), users are prompted to enter the verification code sent to their email or phone.
+5. Password Management
+    - Users can securely change their passwords via the built-in Amplify UI components.
+6. Account Deletion
+    - Users can delete their account entirely, removing all associated data from AWS Cognito.

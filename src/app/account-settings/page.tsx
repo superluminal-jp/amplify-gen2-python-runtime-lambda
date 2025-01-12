@@ -1,6 +1,9 @@
 "use client";
+// Ensures this file is treated as client-side code in a Next.js application.
 
 import { useState, useEffect } from "react";
+// React hooks for managing component state and side effects.
+
 import {
     AccountSettings,
     Divider,
@@ -16,6 +19,8 @@ import {
     TableRow,
     useTheme,
 } from "@aws-amplify/ui-react";
+// AWS Amplify UI React components for building the UI.
+
 import {
     fetchUserAttributes,
     updateUserAttribute,
@@ -23,44 +28,52 @@ import {
     sendUserAttributeVerificationCode,
     type VerifiableUserAttributeKey,
 } from "aws-amplify/auth";
+// Amplify Auth utilities for managing user attributes and authentication flows.
 
 export default function AccountSettingsPage() {
     // ==================== State Management ====================
     const [userAttributes, setUserAttributes] = useState<
         Record<string, string>
     >({});
-    const [newEmail, setNewEmail] = useState("");
-    const [newName, setNewName] = useState("");
-    const [confirmationCode, setConfirmationCode] = useState("");
+    // Stores user attributes fetched from the backend.
+
+    const [newEmail, setNewEmail] = useState(""); // Tracks the input value for updating email.
+    const [newName, setNewName] = useState(""); // Tracks the input value for updating name.
+    const [confirmationCode, setConfirmationCode] = useState(""); // Tracks the confirmation code input for email verification.
     const [currentAttributeKey, setCurrentAttributeKey] = useState<
         string | null
     >(null);
-    const [loading, setLoading] = useState(false);
+    // Tracks the attribute (e.g., email) being verified.
+
+    const [loading, setLoading] = useState(false); // Tracks loading state for async operations.
     const [globalMessage, setGlobalMessage] = useState<{
         type: "success" | "error";
         text: string;
     } | null>(null);
-    const [emailMessage, setEmailMessage] = useState<string | null>(null);
-    const [nameMessage, setNameMessage] = useState<string | null>(null);
-    const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+    // Displays global messages, like errors or success notifications.
 
-    const { tokens } = useTheme();
+    const [emailMessage, setEmailMessage] = useState<string | null>(null); // Displays email-specific messages.
+    const [nameMessage, setNameMessage] = useState<string | null>(null); // Displays name-specific messages.
+    const [passwordMessage, setPasswordMessage] = useState<string | null>(null); // Displays password-specific messages.
+
+    const { tokens } = useTheme(); // Retrieves theme tokens for consistent styling.
 
     // ==================== Event Handlers ====================
+    // Fetches user attributes from AWS Cognito.
     const fetchAttributes = async () => {
         setLoading(true);
         setGlobalMessage(null);
         try {
-            const data = await fetchUserAttributes();
+            const data = await fetchUserAttributes(); // Fetch attributes from the backend.
             const attributes = Object.entries(data || {}).reduce<
                 Record<string, string>
             >((acc, [key, value]) => {
                 if (value !== undefined && value !== null) {
-                    acc[key] = String(value);
+                    acc[key] = String(value); // Convert attribute values to strings.
                 }
                 return acc;
             }, {});
-            setUserAttributes(attributes);
+            setUserAttributes(attributes); // Update the state with fetched attributes.
         } catch (error) {
             console.error("Error fetching user attributes:", error);
             setGlobalMessage({
@@ -72,6 +85,7 @@ export default function AccountSettingsPage() {
         }
     };
 
+    // Updates a user attribute (e.g., email or name).
     const handleUpdateAttribute = async (
         key: string,
         value: string,
@@ -91,14 +105,14 @@ export default function AccountSettingsPage() {
                 result.nextStep.updateAttributeStep ===
                 "CONFIRM_ATTRIBUTE_WITH_CODE"
             ) {
-                setCurrentAttributeKey(key);
+                setCurrentAttributeKey(key); // If confirmation is required, track the attribute key.
                 setMessage(
                     `A confirmation code has been sent to your ${key}. Please enter it below.`
                 );
             } else {
                 setMessage(`${key} updated successfully.`);
             }
-            fetchAttributes();
+            fetchAttributes(); // Refresh user attributes.
         } catch (error) {
             setMessage(`Failed to update ${key}.`);
         } finally {
@@ -106,6 +120,7 @@ export default function AccountSettingsPage() {
         }
     };
 
+    // Confirms a user attribute using a verification code.
     const handleConfirmAttribute = async () => {
         if (!currentAttributeKey || !confirmationCode.trim()) {
             setEmailMessage("Confirmation code is required.");
@@ -120,9 +135,9 @@ export default function AccountSettingsPage() {
                 confirmationCode,
             });
             setEmailMessage(`${currentAttributeKey} confirmed successfully.`);
-            setCurrentAttributeKey(null);
-            setConfirmationCode("");
-            fetchAttributes();
+            setCurrentAttributeKey(null); // Reset the current attribute key after confirmation.
+            setConfirmationCode(""); // Clear the confirmation code input.
+            fetchAttributes(); // Refresh user attributes.
         } catch (error) {
             setEmailMessage("Failed to confirm attribute.");
         } finally {
@@ -130,13 +145,14 @@ export default function AccountSettingsPage() {
         }
     };
 
+    // Handles password update success.
     const handleUpdatePassword = async () => {
         setPasswordMessage("Your password has been updated successfully.");
     };
 
     // ==================== Lifecycle ====================
     useEffect(() => {
-        fetchAttributes();
+        fetchAttributes(); // Fetch user attributes when the component mounts.
     }, []);
 
     // ==================== Render ====================
@@ -144,13 +160,11 @@ export default function AccountSettingsPage() {
         <main>
             <Heading level={1}>Account Settings</Heading>
 
-            {/* グローバルメッセージ */}
-            {globalMessage && (
-                <Text>{globalMessage.text}</Text>
-            )}
+            {/* Display global messages */}
+            {globalMessage && <Text>{globalMessage.text}</Text>}
             {loading && <Text>Loading...</Text>}
 
-            {/* User Attributes */}
+            {/* Display user attributes in a table */}
             <View>
                 <Heading level={2}>User Attributes</Heading>
                 <Table variation="bordered">
@@ -176,7 +190,7 @@ export default function AccountSettingsPage() {
                 style={{ margin: `${tokens.space.large} 0` }}
             />
 
-            {/* Update Email */}
+            {/* Update Email Section */}
             <Heading level={2}>Update Email</Heading>
             <View>
                 <Input
@@ -205,7 +219,7 @@ export default function AccountSettingsPage() {
                 style={{ margin: `${tokens.space.large} 0` }}
             />
 
-            {/* Update Name */}
+            {/* Update Name Section */}
             <Heading level={2}>Update Name</Heading>
             <View>
                 <Input
@@ -225,7 +239,7 @@ export default function AccountSettingsPage() {
                 {nameMessage && <Text>{nameMessage}</Text>}
             </View>
 
-            {/* Confirm Attribute */}
+            {/* Confirm Attribute Section */}
             {currentAttributeKey && (
                 <View>
                     <Heading level={3}>Confirm {currentAttributeKey}</Heading>
@@ -241,9 +255,7 @@ export default function AccountSettingsPage() {
                     >
                         Confirm
                     </Button>
-                    {emailMessage && (
-                        <Text>{emailMessage}</Text>
-                    )}
+                    {emailMessage && <Text>{emailMessage}</Text>}
                 </View>
             )}
 
@@ -252,15 +264,13 @@ export default function AccountSettingsPage() {
                 style={{ margin: `${tokens.space.large} 0` }}
             />
 
-            {/* Update Password */}
+            {/* Update Password Section */}
             <Heading level={2}>Update Password</Heading>
             <View>
                 <AccountSettings.ChangePassword
                     onSuccess={handleUpdatePassword}
                 />
-                {passwordMessage && (
-                    <Text>{passwordMessage}</Text>
-                )}
+                {passwordMessage && <Text>{passwordMessage}</Text>}
             </View>
 
             <Divider
@@ -268,7 +278,7 @@ export default function AccountSettingsPage() {
                 style={{ margin: `${tokens.space.large} 0` }}
             />
 
-            {/* Delete User */}
+            {/* Delete User Section */}
             <Heading level={2}>Delete Account</Heading>
             <AccountSettings.DeleteUser />
         </main>

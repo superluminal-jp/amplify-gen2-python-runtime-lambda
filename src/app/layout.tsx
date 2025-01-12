@@ -1,89 +1,97 @@
-"use client"; // Ensures this file is treated as client-side in a Next.js application.
+"use client";
+// Ensures this file is treated as client-side in a Next.js application.
 
 import { useState } from "react";
+// Importing React's `useState` hook to manage local component state.
+
 import { Geist, Geist_Mono } from "next/font/google";
-// Importing custom Google fonts using Next.js font optimization feature.
+// Importing Google Fonts with Next.js built-in font optimization features for better performance.
 
 import { Authenticator } from "@aws-amplify/ui-react";
-// Importing the Authenticator component from AWS Amplify UI library,
-// which provides built-in UI for handling authentication.
+// Importing Amplify's `Authenticator` component to handle authentication flows such as sign-in, sign-out, and user sessions.
 
 import { Amplify } from "aws-amplify";
-// Importing the Amplify library to configure and interact with AWS Amplify services.
+// Importing the Amplify library to configure the connection to AWS services.
 
 import Header from "./components/Header";
+// Importing a custom `Header` component, likely handling the app's header section.
+
 import Sidebar from "./components/Sidebar";
+// Importing a custom `Sidebar` component for displaying navigation or other content in a side panel.
+
 import ToggleSidebarButton from "./components/ToggleSidebarButton";
+// Importing a button component used to toggle the visibility of the sidebar.
 
 import "@aws-amplify/ui-react/styles.css";
-// Importing default styles for Amplify's UI components to ensure consistent design.
+// Importing Amplify's default styles for consistent UI design of its components.
 
 import outputs from "../../amplify_outputs.json";
-// Importing the Amplify configuration file, which typically contains AWS-related configurations
-// such as API keys, region, user pool details, etc.
+// Importing the AWS Amplify configuration JSON file. This contains environment-specific configuration
+// like API keys, AWS region, Cognito user pool info, etc.
 
 import "./globals.css";
-// Importing global CSS styles for the application. This is where you can define styles
-// that apply to the entire app, like resetting margins, fonts, or body styling.
+// Importing global CSS for the application. This usually includes general resets or common styles.
 
 Amplify.configure(outputs);
-// Configuring AWS Amplify using the imported configuration object.
-// This step connects your app to the specified AWS resources.
+// Configuring AWS Amplify using the imported JSON file. This connects your app to AWS resources defined in Amplify.
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
-    // Defining a CSS custom property for this font, which can be used in your stylesheets.
+    // Defining a CSS variable for the Geist Sans font to be used in global styles.
     subsets: ["latin"],
-    // Specifying subsets to limit font file size to only necessary characters.
+    // Limiting font subsets to Latin to reduce file size and optimize performance.
 });
 
 const geistMono = Geist_Mono({
     variable: "--font-geist-mono",
-    // Defining a CSS custom property for this font, similar to above.
+    // Defining a CSS variable for the Geist Mono font.
     subsets: ["latin"],
-    // Again, restricting to Latin character set.
+    // Restricting font subsets to Latin characters.
 });
 
-// Exporting the default functional component for the app's layout.
+// Default export of the `RootLayout` component. This serves as the layout wrapper for all pages.
 export default function RootLayout({
-    children, // The `children` prop represents the child components that will be rendered inside this layout.
+    children, // The `children` prop represents the components that will be nested within this layout.
 }: Readonly<{
-    children: React.ReactNode; // Enforcing that `children` is of type ReactNode (React's way of describing what can be rendered).
+    children: React.ReactNode; // Ensuring `children` is of type ReactNode (valid JSX or React elements).
 }>) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    // Using React's `useState` hook to create a state variable `isSidebarOpen` and its corresponding setter function `setIsSidebarOpen`.
+    // State hook to manage whether the sidebar is open or closed.
+
     return (
         <html lang="en">
-            {/* The root <html> tag for the document, specifying the language for accessibility and SEO purposes. */}
+            {/* Setting the document's language for accessibility and SEO purposes. */}
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-                // Adding the custom font variables to the <body> class for global usage.
-                // The `antialiased` class smoothens font edges for better readability.
+                // Applying the custom font variables globally and adding `antialiased` for smoother font rendering.
             >
                 <Authenticator>
-                    {/* The Amplify Authenticator component handles authentication flows such as sign-in, 
-                        sign-out, and user session management. */}
-                    {
-                        ({ signOut, user }) => (
-                            // The `Authenticator` component provides a render prop function
-                            // that gives access to the `signOut` function and `user` object.
-                            <main>
-                                <Header onSignOut={() => signOut?.()} />
-                                <ToggleSidebarButton
-                                    isOpen={isSidebarOpen}
-                                    onToggle={() =>
-                                        setIsSidebarOpen(!isSidebarOpen)
-                                    }
-                                />
-                                <Sidebar
-                                    isOpen={isSidebarOpen}
-                                    onClose={() => setIsSidebarOpen(false)}
-                                />
-                                {children}
-                            </main>
-                        )
-                        // Rendering the child components (passed as `children`) inside the <main> tag.
-                    }
+                    {/* The `Authenticator` component provides a complete authentication solution.
+                        It handles sign-in, sign-out, and user session management. */}
+                    {({ signOut, user }) => (
+                        // The render prop pattern is used here, passing `signOut` (function) and `user` (object)
+                        // from the `Authenticator` component to customize the UI.
+                        <main>
+                            <Header onSignOut={() => signOut?.()} />
+                            {/* Rendering the `Header` component and passing a `signOut` handler as a prop.
+                                    This allows the user to sign out when clicking a logout button in the header. */}
+                            <ToggleSidebarButton
+                                isOpen={isSidebarOpen}
+                                onToggle={() =>
+                                    setIsSidebarOpen(!isSidebarOpen)
+                                }
+                                // The `ToggleSidebarButton` toggles the sidebar's visibility by updating state.
+                            />
+                            <Sidebar
+                                isOpen={isSidebarOpen}
+                                onClose={() => setIsSidebarOpen(false)}
+                                // The `Sidebar` component receives props to manage its open/close state.
+                            />
+                            {children}
+                            {/* Rendering the child components that are passed to this layout.
+                                    These represent the page-specific content. */}
+                        </main>
+                    )}
                 </Authenticator>
             </body>
         </html>

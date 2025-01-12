@@ -8,7 +8,7 @@ Sign-in, Sign-out, and Create Account features are provided by `<Authenticator>`
 
 # Account Setting Page
 
-The account setting page is implemented in `src/app/account-settings/page.tsx`. In this page, 4 features are implemented:
+The account setting page is implemented in `src/app/account-settings/page.tsx`. In this page, 5 features are implemented:
 
 1. View and Manage User Attributes
 2. Update User Information (email, username)

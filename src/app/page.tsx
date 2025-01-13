@@ -1,20 +1,71 @@
-// The default export of the `Home` function component, representing the main page of the application.
-export default function Home() {
-    return (
-        <div>
-            {/* The outermost `<div>` acts as a container for the page content. */}
-            <main className="flex min-h-screen flex-col items-center justify-between p-24">
-                {/* The `<main>` element represents the main content area of the page.
-                    - `flex`: Enables Flexbox layout for child elements.
-                    - `min-h-screen`: Ensures the main content occupies at least the full height of the viewport.
-                    - `flex-col`: Aligns Flexbox children in a vertical column.
-                    - `items-center`: Centers children horizontally.
-                    - `justify-between`: Distributes children with space between them vertically.
-                    - `p-24`: Adds padding of 24 units (based on your CSS framework's spacing system). */}
+"use client"; // Enable client-side rendering
 
-                {/* This is the visible content for the page, currently just a simple text "Hello. World". */}
-                Hello. World
-            </main>
-        </div>
+import { useState } from "react"; // React hook for state management
+import type { Schema } from "../../amplify/data/resource"; // API schema type definition
+import { Amplify } from "aws-amplify"; // AWS Amplify for cloud resource interaction
+import { generateClient } from "aws-amplify/api"; // Generate API client for Amplify
+import outputs from "../../amplify_outputs.json"; // Amplify configuration
+import { Flex, Button, TextField } from "@aws-amplify/ui-react"; // Amplify UI components
+
+// Configure Amplify with settings from amplify_outputs.json
+Amplify.configure(outputs);
+
+// Generate a typed API client using the defined schema
+const client = generateClient<Schema>();
+
+// Main component for the home page
+export default function Home() {
+    // State to manage user input (name)
+    const [name, setName] = useState<string>("John Doe");
+
+    // State to store the response message from the API
+    const [message, setMessage] = useState<string>("");
+
+    // Function to call the `sayHello` API endpoint
+    const handleSayHello = async () => {
+        try {
+            // Invoke API query with the user's name
+            const response = await client.queries.sayHello({ name });
+
+            // Parse and process the response
+            if (response.data) {
+                const parsedData = JSON.parse(response.data as string);
+
+                // Extract the message if available
+                if (parsedData.body) {
+                    const responseBody = JSON.parse(parsedData.body as string);
+                    setMessage(responseBody.message || "No message returned.");
+                } else {
+                    console.error("Response body is missing.");
+                }
+            } else {
+                console.error("Response data is missing.");
+            }
+        } catch (error) {
+            console.error("Error calling sayHelloFunction:", error);
+        }
+    };
+
+    return (
+        <main>
+            <Flex
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+                wrap="wrap"
+            >
+                <TextField
+                    label="Enter Your Name" // Label for the input field
+                    errorMessage="There is an error" // Error message (for potential validation)
+                    value={name} // Controlled input value
+                    placeholder="John Doe" // Default placeholder text
+                    onChange={(e) => setName(e.target.value)} // Update state on input change
+                />
+                <Button onClick={handleSayHello}>Hello.</Button>{" "}
+                {/* Trigger API call */}
+                {message && <p>{message}</p>}{" "}
+                {/* Display the response message */}
+            </Flex>
+        </main>
     );
 }

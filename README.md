@@ -1,46 +1,143 @@
-# AWS Amplify Gen 2: Account Settings Application
+# AWS Amplify Gen 2: Python Custom Lambda Function Application
 
-This project demonstrates a Next.js App Router application integrated with AWS Amplify Gen 2 for user account management. It uses AWS Cognito for authentication and provides a user-friendly interface for managing account settings. The application includes features for updating user attributes, handling verification codes, managing passwords, and account deletion. See [AWS Amplify Gen 2](https://docs.amplify.aws/nextjs/build-a-backend/auth/) for more information.
+This project demonstrates how to integrate a Python runtime custom Lambda function into an AWS Amplify Gen 2 application. Built with Next.js using the App Router, the project highlights seamless interaction with the backend via Amplify’s generated API client. It includes a user-friendly interface for making API calls and displaying responses. See [AWS Amplify Gen 2](https://docs.amplify.aws/nextjs/build-a-backend/functions/custom-functions/) for more information.
 
-![Account Settings Page Screenshot](./AccountSettingPage.png)
+---
 
-# Authenticator Component
+## How to Integrate a Python Runtime Custom Lambda Function into an AWS Amplify Gen 2 Application
 
-The `<Authenticator>` component in `src/app/layout.tsx` handles Sign-in, Sign-out, and Create Account features. See [AWS Amplify Gen 2 Authenticator](https://docs.amplify.aws/nextjs/build-a-backend/auth/connect-your-frontend/using-the-authenticator/) for more information.
+### 1. Create a New Next.js Project
 
-# Account Settings Page
+> Reference: https://nextjs.org/docs/app/getting-started/installation#automatic-installation
 
-Located at `src/app/account-settings/page.tsx`, this page implements five core features:
+Open your terminal and create a new Next.js project with the following command:
 
-1. View and Manage User Attributes
-2. Update User Information (email, username)
-3. Confirmation Code Handling
-4. Password Management
-5. Account Deletion
+```bash
+npx create-next-app@latest
+```
 
-# Key Features
+When prompted, configure your project settings:
 
-1. User Authentication
-    - Secure sign-up, sign-in, and session management through AWS Cognito
-    - Complete authentication flow handling via Amplify's Authenticator component
-2. User Attributes Management
-    - Direct access to view AWS Cognito user attributes (name, email)
-    - Clear, accessible table display of attributes
-3. Information Updates
-    - Email updates with verification code confirmation
-    - Instant display name updates without verification
-4. Verification Process
-    - Verification code system for sensitive attribute changes
-    - Email and phone verification support
-5. Password Management
-    - Secure password changes through Amplify UI components
-6. Account Deletion
-    - Complete account removal with AWS Cognito data cleanup
+```bash
+✔ What is your project named? … amplify-gen2-account-settings
+✔ Would you like to use TypeScript? … No / Yes
+✔ Would you like to use ESLint? … No / Yes
+✔ Would you like to use Tailwind CSS? … No / Yes
+✔ Would you like your code inside a `src/` directory? … No / Yes
+✔ Would you like to use App Router? (recommended) … No / Yes
+✔ Would you like to use Turbopack for `next dev`? … No / Yes
+✔ Would you like to customize the import alias (`@/*` by default)? … No / Yes
+```
 
-# How to Use
+Navigate to the project directory:
 
-1. Launch the development server: `npm run dev`
-2. Visit `http://localhost:3000` in your browser
-3. Create a new account or log in
-4. Access account settings through the sidebar
-5. Use the "Delete Account" button in account settings to remove your account
+```bash
+cd amplify-gen2-account-settings
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000/) in your browser to view the application.
+
+---
+
+### 2. Install Amplify Gen 2
+
+> Reference: https://docs.amplify.aws/react/start/manual-installation/
+
+Install Amplify in your project folder:
+
+```bash
+npm create amplify@latest
+? Where should we create your project? (.) # press enter
+```
+
+The `amplify` folder will be created in the project directory, containing the following structure:
+
+```
+amplify/
+├── auth/
+│   └── resource.ts
+├── data/
+│   └── resource.ts
+├── backend.ts
+├── tsconfig.json
+└── package.json
+```
+
+Deploy the cloud sandbox in a new terminal tab:
+
+```bash
+npx ampx sandbox
+```
+
+This will automatically generate the `amplify_outputs.json` file and create the required AWS components. This process may take a few minutes.
+
+---
+
+### 3. Install Required Packages
+
+> Reference: https://ui.docs.amplify.aws/react/getting-started/installation
+
+Install the necessary dependencies:
+
+```bash
+npm install @aws-amplify/ui-react aws-amplify react-icons
+```
+
+---
+
+### 4. Create a Custom Lambda Function
+
+1. In the `amplify/functions/` directory, create a folder named `say-hello`.
+2. Add the following files:
+    - `functions/say-hello/resource.ts`
+    - `functions/say-hello/handler.py`
+3. Ensure the `runtime` in `resource.ts` is set to Python.
+4. Use `handler` as the function name (not `lambda-handler` or others).
+5. Handle arguments via `event.arguments` in the handler function.
+
+Example `schema` configuration in `amplify/data/resource.ts`:
+
+```typescript
+const schema = a.schema({
+    sayHello: a
+        .query() // Defines the query operation
+        .arguments({ name: a.string() }) // Expects a "name" argument of type string
+        .returns(a.json()) // Returns a JSON response
+        .handler(a.handler.function(sayHelloFunctionHandler)) // Maps to the Lambda function handler
+        .authorization((allow) => [allow.publicApiKey()]), // Allows public API key access
+});
+```
+
+---
+
+### 5. Use the Function in the Frontend
+
+To use the custom function in your frontend, import the schema and outputs:
+
+```typescript
+import type { Schema } from "../../amplify/data/resource"; // API schema type definition
+import { Amplify } from "aws-amplify"; // AWS Amplify for cloud resource interaction
+import { generateClient } from "aws-amplify/api"; // Generate API client for Amplify
+import outputs from "../../amplify_outputs.json"; // Amplify configuration
+
+// Configure Amplify with settings from amplify_outputs.json
+Amplify.configure(outputs);
+
+// Generate a typed API client using the defined schema
+const client = generateClient<Schema>();
+```
+
+Invoke the function through the client:
+
+```typescript
+// Invoke API query with the user's name
+const response = await client.queries.sayHello({ name });
+```
+
+---

@@ -40,6 +40,10 @@ export default function Sidebar({
                 </Link>
                 {/* A link to the homepage. `href="/"` specifies the target route. */}
 
+                <Link href="/langchain" className="sidebar-item">
+                    LangChain
+                </Link>
+
                 <Link href="/account-settings" className="sidebar-item">
                     Account Settings
                 </Link>

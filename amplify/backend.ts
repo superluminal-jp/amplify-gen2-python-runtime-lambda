@@ -1,13 +1,22 @@
-import { defineBackend } from '@aws-amplify/backend';
-import { auth } from './auth/resource';
-import { data } from './data/resource';
-import { sayHelloFunctionHandler } from './functions/say-hello/resource';
+import { defineBackend } from "@aws-amplify/backend";
+import { auth } from "./auth/resource";
+import { data } from "./data/resource";
+import { sayHelloFunctionHandler } from "./functions/say-hello/resource";
+import { langChainFunctionHandler } from "./functions/langchain/resource";
 
-/**
- * @see https://docs.amplify.aws/react/build-a-backend/ to add storage, functions, and more
- */
-defineBackend({
-  auth,
-  data,
-  sayHelloFunctionHandler,
+import * as iam from "aws-cdk-lib/aws-iam";
+
+const backend = defineBackend({
+    auth,
+    data,
+    sayHelloFunctionHandler,
+    langChainFunctionHandler,
 });
+
+const statement = new iam.PolicyStatement({
+    // effect: "Allow",
+    actions: ["bedrock:*"],
+    resources: ["*"],
+});
+
+backend.langChainFunctionHandler.resources.lambda.addToRolePolicy(statement);

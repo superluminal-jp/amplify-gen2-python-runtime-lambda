@@ -1,8 +1,9 @@
 // Import necessary utilities and types from AWS Amplify backend package
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
-// Import the handler function for the "sayHello" operation from the custom Lambda function
+// Import the handler functions for the "sayHello" and the "langchain" operation from the custom Lambda function
 import { sayHelloFunctionHandler } from "../functions/say-hello/resource";
+import { langChainFunctionHandler } from "../functions/langchain/resource";
 
 /*
  * Define the schema for the backend API using Amplify's schema utilities.
@@ -21,6 +22,21 @@ const schema = a.schema({
         // Associates the "sayHello" query with a handler function (the Lambda function "sayHelloFunctionHandler")
         .authorization((allow) => [allow.publicApiKey()]),
     // Sets the authorization mode for the query to allow access via a public API key
+
+    // Define a query operation named "langchain"
+    langchain: a
+        .query() // Specifies that this is a query (read-only operation)
+        .arguments({
+            // Defines the arguments for the "sayHello" query
+            input: a.string(), // The query accepts a single "name" argument of type string
+        })
+        .returns(a.json()) // Specifies that the query will return a JSON response
+        .handler(a.handler.function(langChainFunctionHandler))
+        // Associates the "sayHello" query with a handler function (the Lambda function "sayHelloFunctionHandler")
+        .authorization((allow) => [
+            allow.publicApiKey(),
+        ]),
+    // Sets the authorization mode for the query to allow access via a public API key
 });
 
 // Export the schema type to make it accessible in other parts of the application
@@ -31,5 +47,6 @@ export const data = defineData({
     schema, // Attach the schema defined above
     authorizationModes: {
         defaultAuthorizationMode: "apiKey", // Set the default authorization mode to use an API key
+        
     },
 });

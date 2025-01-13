@@ -2,6 +2,7 @@
 
 This project demonstrates how to integrate a Python runtime custom Lambda function into an AWS Amplify Gen 2 application. Built with Next.js using the App Router, the project highlights seamless interaction with the backend via Amplify’s generated API client. It includes a user-friendly interface for making API calls and displaying responses. See [AWS Amplify Gen 2](https://docs.amplify.aws/nextjs/build-a-backend/functions/custom-functions/) for more information.
 
+![Demonstration](./LangChainDemo.png)
 ---
 
 ## How to Integrate a Python Runtime Custom Lambda Function into an AWS Amplify Gen 2 Application

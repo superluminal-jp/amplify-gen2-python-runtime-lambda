@@ -7,14 +7,14 @@ import { Code, Function, Runtime } from "aws-cdk-lib/aws-lambda";
 
 const functionDir = path.dirname(fileURLToPath(import.meta.url));
 
-export const langchainFunctionHandler = defineFunction(
+export const langChainFunctionHandler = defineFunction(
   (scope) => {
     // Get the stack name and use it to determine the function name
     // This is to ensure that the function name is unique across different stacks
     const stackName = Stack.of(scope).stackName || "";
     const functionName = stackName.includes("sandbox")
-      ? "langchain-sandbox"
-      : "langchain";
+      ? "langChain-sandbox"
+      : "langChain";
 
     return new Function(scope, functionName, {
       handler: "index.handler",

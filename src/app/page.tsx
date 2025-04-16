@@ -44,9 +44,11 @@ const Home: React.FC = () => {
       const body =
         typeof action.body === "string" ? JSON.parse(action.body) : action.body;
       setMessage(body.message ?? "");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error in sayHello:", err);
-      setError(err.message ?? "An unexpected error occurred.");
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred."
+      );
     } finally {
       setLoading(false);
     }

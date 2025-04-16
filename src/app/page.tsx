@@ -15,57 +15,56 @@ const client = generateClient<Schema>();
 
 // Main component for the home page
 export default function Home() {
-    // State to manage user input (name)
-    const [name, setName] = useState<string>("John Doe");
+  // State to manage user input (name)
+  const [name, setName] = useState<string>("John Doe");
 
-    // State to store the response message from the API
-    const [message, setMessage] = useState<string>("");
+  // State to store the response message from the API
+  const [message, setMessage] = useState<string>("");
 
-    // Function to call the `sayHello` API endpoint
-    const handleSayHello = async () => {
-        try {
-            // Invoke API query with the user's name
-            const response = await client.queries.sayHello({ name });
+  // Function to call the `sayHello` API endpoint
+  const handleSayHello = async () => {
+    try {
+      // Invoke API query with the user's name
+      const response = await client.queries.sayHello({ name });
 
-            // Parse and process the response
-            if (response.data) {
-                const parsedData = JSON.parse(response.data as string);
+      // Parse and process the response
+      if (response.data) {
+        const parsedData = JSON.parse(response.data as string);
 
-                // Extract the message if available
-                if (parsedData.body) {
-                    const responseBody = JSON.parse(parsedData.body as string);
-                    setMessage(responseBody.message || "No message returned.");
-                } else {
-                    console.error("Response body is missing.");
-                }
-            } else {
-                console.error("Response data is missing.");
-            }
-        } catch (error) {
-            console.error("Error calling sayHelloFunction:", error);
+        // Extract the message if available
+        if (parsedData.body) {
+          const responseBody = JSON.parse(parsedData.body as string);
+          setMessage(responseBody.message || "No message returned.");
+        } else {
+          console.error("Response body is missing.");
         }
-    };
+      } else {
+        console.error("Response data is missing.");
+      }
+    } catch (error) {
+      console.error("Error calling sayHelloFunction:", error);
+    }
+  };
 
-    return (
-        <main>
-            <Flex
-                direction="column"
-                justifyContent="center"
-                alignItems="center"
-                wrap="wrap"
-            >
-                <TextField
-                    label="Enter Your Name" // Label for the input field
-                    errorMessage="There is an error" // Error message (for potential validation)
-                    value={name} // Controlled input value
-                    placeholder="John Doe" // Default placeholder text
-                    onChange={(e) => setName(e.target.value)} // Update state on input change
-                />
-                <Button onClick={handleSayHello}>Hello.</Button>{" "}
-                {/* Trigger API call */}
-                {message && <p>{message}</p>}{" "}
-                {/* Display the response message */}
-            </Flex>
-        </main>
-    );
+  return (
+    <main>
+      <Flex
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        wrap="wrap"
+      >
+        <TextField
+          label="Enter Your Name" // Label for the input field
+          errorMessage="There is an error" // Error message (for potential validation)
+          value={name} // Controlled input value
+          placeholder="John Doe" // Default placeholder text
+          onChange={(e) => setName(e.target.value)} // Update state on input change
+        />
+        <Button onClick={handleSayHello}>Hello.</Button>{" "}
+        {/* Trigger API call */}
+        {message && <p>{message}</p>} {/* Display the response message */}
+      </Flex>
+    </main>
+  );
 }

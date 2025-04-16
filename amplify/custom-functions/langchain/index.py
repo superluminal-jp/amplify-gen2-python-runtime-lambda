@@ -1,64 +1,71 @@
+"""AWS Lambda function using LangChain Bedrock for translating between Japanese and English."""
+
+import os
+import json
 import logging
+from typing import Any, Dict
+
 from langchain_aws import ChatBedrockConverse
 
-# Configure logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-def handler(event, context):
+# Configuration loaded from environment variables
+MODEL_NAME = os.getenv("MODEL_NAME", "anthropic.claude-3-5-sonnet-20240620-v1:0")
+REGION_NAME = os.getenv("REGION_NAME", "ap-northeast-1")
+TEMPERATURE = float(os.getenv("TEMPERATURE", "0"))
+MAX_TOKENS = int(os.getenv("MAX_TOKENS", "4096"))
+
+# Initialize LLM client outside the handler for connection reuse
+llm = ChatBedrockConverse(
+    model=MODEL_NAME,
+    temperature=TEMPERATURE,
+    max_tokens=MAX_TOKENS,
+    region_name=REGION_NAME,
+)
+
+
+def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """
-    Lambda handler for translating sentences between Japanese and English using LangChain Bedrock.
-    Logs are added to aid debugging and monitoring.
+    AWS Lambda handler for translating sentences between Japanese and English.
+    Expects event format: {'arguments': {'input': <string>}}.
+    Returns a dict with 'statusCode' and 'body'.
     """
-    try:
-        logger.info("Handler invoked with event: %s", event)
+    logger.info("Handler invoked with event: %s", event)
+    args = event.get("arguments", {})
+    input_text = args.get("input")
 
-        # Retrieve input from the event
-        input_text = event.get('arguments', {}).get('input', None)
-        if not input_text:
-            logger.warning("No input text provided in event: %s", event)
-            return {
-                'statusCode': 400,
-                'body': "Error: 'input' argument is missing."
-            }
-
-        logger.info("Input text received: %s", input_text)
-
-        # Initialize the LLM model
-        llm = ChatBedrockConverse(
-            model="anthropic.claude-3-5-sonnet-20240620-v1:0",
-            temperature=0,
-            max_tokens=4096,
-            region_name="ap-northeast-1",
-        )
-        logger.info("LLM model initialized")
-        
-        # Define the conversation messages
-        messages = [
-            ("system", "You are a helpful translator. Translate the user sentence between Japanese and English."),
-            ("human", input_text),
-        ]
-        logger.info("Messages prepared for LLM: %s", messages)
-
-        # Invoke the LLM model
-        response = llm.invoke(messages)
-        logger.info("LLM response received: %s", response)
-
-        # Extract assistant response
-        assistant_response = response.content
-        logger.info("Assistant response extracted: %s", assistant_response)
-
+    if not input_text or not isinstance(input_text, str):
+        logger.warning("Invalid or missing 'input' argument: %s", args)
         return {
-            'statusCode': 200,
-            'body': assistant_response
+            "statusCode": 400,
+            "body": json.dumps({"error": "Missing or invalid 'input' argument."}),
         }
 
-    except Exception as e:
-        logger.error("An error occurred: %s", str(e), exc_info=True)
+    logger.info("Input text for translation: %s", input_text)
+    try:
+        messages = [
+            (
+                "system",
+                "You are a helpful translator. Translate the user sentence between Japanese and English.",
+            ),
+            ("human", input_text),
+        ]
+        logger.debug("Prepared messages for LLM: %s", messages)
+
+        response = llm.invoke(messages)
+        translation = response.content
+        logger.info("LLM translation result: %s", translation)
+
+        return {"statusCode": 200, "body": translation}
+    except Exception as exc:
+        logger.error("Error during LLM invocation: %s", exc, exc_info=True)
         return {
-            'statusCode': 500,
-            'body': {
-                'error': str(e),
-                'message': "An internal error occurred while processing the request."
-            }
+            "statusCode": 500,
+            "body": json.dumps(
+                {
+                    "error": str(exc),
+                    "message": "Internal server error during translation.",
+                }
+            ),
         }

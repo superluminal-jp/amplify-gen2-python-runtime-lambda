@@ -1,48 +1,54 @@
-"use client"; // Enable client-side rendering
+"use client";
 
-import { useState } from "react"; // React hook for state management
-import type { Schema } from "../../amplify/data/resource"; // API schema type definition
-import { Amplify } from "aws-amplify"; // AWS Amplify for cloud resource interaction
-import { generateClient } from "aws-amplify/api"; // Generate API client for Amplify
-import outputs from "../../amplify_outputs.json"; // Amplify configuration
-import { Flex, Button, TextField } from "@aws-amplify/ui-react"; // Amplify UI components
+import React, { useState } from "react";
+import type { Schema } from "../../amplify/data/resource";
+import { Amplify } from "aws-amplify";
+import { generateClient } from "aws-amplify/api";
+import awsConfig from "../../amplify_outputs.json";
+import { Flex, Button, TextField, View, Heading } from "@aws-amplify/ui-react";
 
-// Configure Amplify with settings from amplify_outputs.json
-Amplify.configure(outputs);
+// Configure Amplify
+Amplify.configure(awsConfig);
 
-// Generate a typed API client using the defined schema
+// Typed API client
 const client = generateClient<Schema>();
 
-// Main component for the home page
-export default function Home() {
-  // State to manage user input (name)
-  const [name, setName] = useState<string>("John Doe");
-
-  // State to store the response message from the API
+const Home: React.FC = () => {
+  const [name, setName] = useState<string>("");
   const [message, setMessage] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
-  // Function to call the `sayHello` API endpoint
-  const handleSayHello = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      setError("Please enter a name.");
+      return;
+    }
+    setError("");
+    setMessage("");
+    setLoading(true);
     try {
-      // Invoke API query with the user's name
       const response = await client.queries.sayHello({ name });
-
-      // Parse and process the response
-      if (response.data) {
-        const parsedData = JSON.parse(response.data as string);
-
-        // Extract the message if available
-        if (parsedData.body) {
-          const responseBody = JSON.parse(parsedData.body as string);
-          setMessage(responseBody.message || "No message returned.");
-        } else {
-          console.error("Response body is missing.");
-        }
-      } else {
-        console.error("Response data is missing.");
+      if (response.errors?.length) {
+        throw new Error(response.errors.map((err) => err.message).join(", "));
       }
-    } catch (error) {
-      console.error("Error calling sayHelloFunction:", error);
+      const payload = response.data as
+        | { statusCode: number; body: string }
+        | undefined;
+      if (!payload) {
+        throw new Error("Empty response from server.");
+      }
+      const action =
+        typeof payload === "string" ? JSON.parse(payload) : payload;
+      const body =
+        typeof action.body === "string" ? JSON.parse(action.body) : action.body;
+      setMessage(body.message ?? "");
+    } catch (err: any) {
+      console.error("Error in sayHello:", err);
+      setError(err.message ?? "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,19 +58,33 @@ export default function Home() {
         direction="column"
         justifyContent="center"
         alignItems="center"
-        wrap="wrap"
+        gap="1rem"
+        padding="2rem"
       >
-        <TextField
-          label="Enter Your Name" // Label for the input field
-          errorMessage="There is an error" // Error message (for potential validation)
-          value={name} // Controlled input value
-          placeholder="John Doe" // Default placeholder text
-          onChange={(e) => setName(e.target.value)} // Update state on input change
-        />
-        <Button onClick={handleSayHello}>Hello.</Button>{" "}
-        {/* Trigger API call */}
-        {message && <p>{message}</p>} {/* Display the response message */}
+        <Heading level={2}>Say Hello</Heading>
+        <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: 400 }}>
+          <TextField
+            label="Name"
+            placeholder="Enter your name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            hasError={Boolean(error)}
+            errorMessage={error}
+            autoComplete="off"
+            required
+          />
+          <Button type="submit" isLoading={loading} isDisabled={loading}>
+            {loading ? "Loading..." : "Say Hello"}
+          </Button>
+        </form>
+        {message && (
+          <View padding="1rem" backgroundColor="#f0f0f0" borderRadius="4px">
+            {message}
+          </View>
+        )}
       </Flex>
     </main>
   );
-}
+};
+
+export default Home;

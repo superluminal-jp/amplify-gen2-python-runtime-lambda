@@ -1,2 +1,2 @@
-langchain==0.3.14
+langchain
 langchain-aws

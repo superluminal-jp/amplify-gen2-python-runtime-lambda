@@ -30,8 +30,13 @@ export default function LangChainPage() {
     setLoading(true);
 
     try {
+      console.log("Input:", input);
       const response = await client.queries.langchain({ input });
-      console.log("Langchain API response:", response);
+      console.log("Langchain API response:", JSON.stringify(response, null, 2));
+
+      if (!response || !response.data) {
+        throw new Error("Empty response from API");
+      }
 
       if (response.errors?.length) {
         throw new Error(response.errors.map((err) => err.message).join(", "));
@@ -41,16 +46,24 @@ export default function LangChainPage() {
         | { statusCode: number; body: string }
         | undefined;
       if (!payload) {
-        throw new Error("Empty response from server.");
+        throw new Error("Empty response data from server.");
       }
+
+      console.log("Payload received:", JSON.stringify(payload, null, 2));
 
       const action =
         typeof payload === "string" ? JSON.parse(payload) : payload;
+      console.log("Action object:", JSON.stringify(action, null, 2));
+
       const body =
         typeof action.body === "string" ? JSON.parse(action.body) : action.body;
-      console.log("Processed response:", body);
+      console.log("Processed response body:", JSON.stringify(body, null, 2));
 
-      setOutput(body);
+      if (!body || !body.translation) {
+        throw new Error("Translation data not found in response");
+      }
+
+      setOutput(body.translation || "No translation received");
     } catch (error) {
       console.error("Error calling langchain API:", error);
       setError(
@@ -84,10 +97,7 @@ export default function LangChainPage() {
         </Button>
         {error && <Text variation="error">{error}</Text>}
         {output && (
-          <View
-            padding="1rem"
-            backgroundColor="var(--amplify-colors-background-secondary)"
-          >
+          <View>
             <Text>{output}</Text>
           </View>
         )}

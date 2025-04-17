@@ -79,11 +79,7 @@ const Home: React.FC = () => {
             {loading ? "Loading..." : "Say Hello"}
           </Button>
         </form>
-        {message && (
-          <View padding="1rem" backgroundColor="#f0f0f0" borderRadius="4px">
-            {message}
-          </View>
-        )}
+        {message && <View>{message}</View>}
       </Flex>
     </main>
   );

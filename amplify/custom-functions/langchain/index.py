@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # Configuration loaded from environment variables
-MODEL_NAME = os.getenv("MODEL_NAME", "anthropic.claude-3-5-sonnet-20240620-v1:0")
+MODEL_NAME = os.getenv("MODEL_NAME", "anthropic.claude-3-7-sonnet-20250219-v1:0")
 REGION_NAME = os.getenv("REGION_NAME", "ap-northeast-1")
 TEMPERATURE = float(os.getenv("TEMPERATURE", "0"))
 MAX_TOKENS = int(os.getenv("MAX_TOKENS", "4096"))
